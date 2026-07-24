@@ -998,6 +998,69 @@ section { position: relative; }
 .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--peach); }
 .field textarea { min-height: 9rem; resize: vertical; }
 
+/* ---------- Floating contact widget ---------- */
+
+.fab {
+  position: fixed;
+  right: clamp(1rem, 3vw, 2rem);
+  bottom: clamp(1rem, 3vw, 2rem);
+  z-index: 95;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.8rem;
+}
+
+.fab-btn {
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 50%;
+  border: 1px solid rgba(244, 162, 122, 0.5);
+  background: linear-gradient(135deg, var(--copper), var(--peach));
+  color: var(--black);
+  font-size: 1.35rem;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55), 0 0 0 6px rgba(244, 162, 122, 0.08);
+  transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+}
+.fab-btn:hover { transform: scale(1.07); box-shadow: 0 10px 32px rgba(0, 0, 0, 0.6), 0 0 0 9px rgba(244, 162, 122, 0.12); }
+.fab-btn span { grid-area: 1 / 1; transition: opacity 0.25s, transform 0.35s var(--ease); }
+.fab .fab-close { opacity: 0; transform: rotate(-90deg); }
+.fab.open .fab-close { opacity: 1; transform: none; }
+.fab.open .fab-open { opacity: 0; transform: rotate(90deg); }
+
+.fab-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: opacity 0.35s var(--ease), transform 0.35s var(--ease), visibility 0.35s;
+}
+.fab.open .fab-menu { opacity: 1; visibility: visible; transform: none; }
+
+.fab-menu a {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  background: rgba(17, 16, 16, 0.97);
+  border: 1px solid var(--line);
+  padding: 0.75rem 1.2rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ivory-70);
+  border-radius: 2rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  transition: color 0.3s, border-color 0.3s, transform 0.3s var(--ease);
+}
+.fab-menu a:hover { color: var(--peach); border-color: rgba(244, 162, 122, 0.5); transform: translateX(-4px); }
+.fab-menu .fab-ico { color: var(--peach); font-size: 0.95rem; }
+
 /* ---------- Reveal animations ---------- */
 
 .reveal {
