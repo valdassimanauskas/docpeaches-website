@@ -154,6 +154,109 @@
     openModal();
   });
 
+  // ---------- Site search ----------
+  var searchModal = document.createElement("div");
+  searchModal.className = "search-modal";
+  searchModal.innerHTML =
+    '<div class="consult-backdrop"></div>' +
+    '<div class="search-panel">' +
+    '<div class="search-bar">' +
+    '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>' +
+    '<input type="search" placeholder="Search conditions, treatments…" aria-label="Search the site" autocomplete="off">' +
+    '<button class="consult-close" aria-label="Close search" style="position:static;flex-shrink:0">' +
+    '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>' +
+    "</div>" +
+    '<div class="search-results"><p class="search-hint">Try “knee pain”, “PRP”, “sciatica”, “hair loss”…</p></div>' +
+    "</div>";
+  document.body.appendChild(searchModal);
+  var searchInput = searchModal.querySelector("input");
+  var searchResults = searchModal.querySelector(".search-results");
+  var indexLoaded = false;
+
+  function openSearch() {
+    searchModal.classList.add("open");
+    document.body.classList.add("consult-open");
+    if (!indexLoaded && !window.SEARCH_INDEX) {
+      var s = document.createElement("script");
+      s.src = siteRoot + "js/search-index.js";
+      s.onload = function () { indexLoaded = true; runSearch(); };
+      document.head.appendChild(s);
+    }
+    setTimeout(function () { searchInput.focus(); }, 120);
+  }
+  function closeSearch() {
+    searchModal.classList.remove("open");
+    document.body.classList.remove("consult-open");
+  }
+  searchModal.querySelector(".consult-backdrop").addEventListener("click", closeSearch);
+  searchModal.querySelector(".consult-close").addEventListener("click", closeSearch);
+  document.addEventListener("keydown", function (ev) {
+    if (ev.key === "Escape") closeSearch();
+    if ((ev.key === "/" || (ev.key.toLowerCase() === "k" && (ev.ctrlKey || ev.metaKey))) &&
+        !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) {
+      ev.preventDefault();
+      openSearch();
+    }
+  });
+
+  function runSearch() {
+    var q = searchInput.value.trim().toLowerCase();
+    if (!window.SEARCH_INDEX) return;
+    if (q.length < 2) {
+      searchResults.innerHTML = '<p class="search-hint">Try “knee pain”, “PRP”, “sciatica”, “hair loss”…</p>';
+      return;
+    }
+    var terms = q.split(/\s+/);
+    var scored = [];
+    window.SEARCH_INDEX.forEach(function (e) {
+      var t = e.t.toLowerCase(), c = e.c.toLowerCase(), d = (e.d || "").toLowerCase();
+      var score = 0;
+      var allMatch = terms.every(function (term) {
+        if (t.indexOf(term) === 0) { score += 30; return true; }
+        if (t.indexOf(term) !== -1) { score += 20; return true; }
+        if (c.indexOf(term) !== -1) { score += 8; return true; }
+        if (d.indexOf(term) !== -1) { score += 4; return true; }
+        return false;
+      });
+      if (allMatch) scored.push([score, e]);
+    });
+    scored.sort(function (a, b) { return b[0] - a[0]; });
+    if (!scored.length) {
+      searchResults.innerHTML = '<p class="search-hint">No matches — try a different term, or <a href="' + siteRoot + 'conditions/index.html" style="color:var(--peach)">browse all conditions</a>.</p>';
+      return;
+    }
+    searchResults.innerHTML = scored.slice(0, 12).map(function (pair) {
+      var e = pair[1];
+      return '<a class="search-item" href="' + siteRoot + e.u + '">' +
+        '<span class="search-title">' + e.t + "</span>" +
+        '<span class="search-cat">' + e.c + "</span></a>";
+    }).join("");
+  }
+  searchInput.addEventListener("input", runSearch);
+
+  // Search triggers: header icon + mobile nav entry
+  var headerInner = document.querySelector(".header-inner");
+  if (headerInner) {
+    var sBtn = document.createElement("button");
+    sBtn.className = "search-btn";
+    sBtn.setAttribute("aria-label", "Search");
+    sBtn.innerHTML = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>';
+    sBtn.addEventListener("click", openSearch);
+    headerInner.insertBefore(sBtn, headerInner.querySelector(".header-cta"));
+  }
+  var mobileNav = document.querySelector(".mobile-nav");
+  if (mobileNav) {
+    var mSearch = document.createElement("a");
+    mSearch.href = "#";
+    mSearch.textContent = "Search";
+    mSearch.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      document.body.classList.remove("mobile-nav-open");
+      openSearch();
+    });
+    mobileNav.insertBefore(mSearch, mobileNav.firstChild);
+  }
+
   // Contact forms (no backend — mailto handoff)
   document.querySelectorAll("form.contact-form").forEach(function (form) {
     form.addEventListener("submit", function (ev) {
