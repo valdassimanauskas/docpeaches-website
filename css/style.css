@@ -340,6 +340,15 @@ section { position: relative; }
   .mobile-nav-open .nav-toggle span:nth-child(3) { transform: translateY(-0.43rem) rotate(-45deg); }
 }
 
+/* backdrop-filter on the scrolled header makes it the containing block for
+   fixed children, collapsing the mobile menu to the header's height — drop
+   the filter while the menu is open so the overlay spans the viewport */
+body.mobile-nav-open .site-header.scrolled {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: rgba(11, 11, 11, 0.98);
+}
+
 .mobile-nav {
   position: fixed;
   inset: 0;
@@ -1012,12 +1021,12 @@ section { position: relative; }
 }
 
 .fab-btn {
-  width: 3.6rem;
-  height: 3.6rem;
+  width: 3.7rem;
+  height: 3.7rem;
   border-radius: 50%;
-  border: 1px solid rgba(244, 162, 122, 0.5);
-  background: linear-gradient(135deg, var(--copper), var(--peach));
-  color: var(--black);
+  border: 1px solid rgba(244, 162, 122, 0.55);
+  background: radial-gradient(circle at 35% 30%, #201b18, #0e0d0c);
+  color: var(--peach);
   font-size: 1.35rem;
   cursor: pointer;
   display: grid;
@@ -1026,7 +1035,8 @@ section { position: relative; }
   transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
 }
 .fab-btn:hover { transform: scale(1.07); box-shadow: 0 10px 32px rgba(0, 0, 0, 0.6), 0 0 0 9px rgba(244, 162, 122, 0.12); }
-.fab-btn span { grid-area: 1 / 1; transition: opacity 0.25s, transform 0.35s var(--ease); }
+.fab-btn span { grid-area: 1 / 1; display: grid; place-items: center; transition: opacity 0.25s, transform 0.35s var(--ease); }
+.fab-btn .fab-open img { width: 2.15rem; height: auto; display: block; }
 .fab .fab-close { opacity: 0; transform: rotate(-90deg); }
 .fab.open .fab-close { opacity: 1; transform: none; }
 .fab.open .fab-open { opacity: 0; transform: rotate(90deg); }
@@ -1060,6 +1070,72 @@ section { position: relative; }
 }
 .fab-menu a:hover { color: var(--peach); border-color: rgba(244, 162, 122, 0.5); transform: translateX(-4px); }
 .fab-menu .fab-ico { color: var(--peach); font-size: 0.95rem; }
+
+/* ---------- Consultation modal ---------- */
+
+.consult-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 140;
+  display: grid;
+  place-items: center;
+  padding: 1.2rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.35s var(--ease), visibility 0.35s;
+}
+.consult-modal.open { opacity: 1; visibility: visible; }
+
+.consult-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 5, 5, 0.78);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.consult-panel {
+  position: relative;
+  width: min(34rem, 100%);
+  max-height: min(92svh, 46rem);
+  overflow-y: auto;
+  background: var(--black-2);
+  border: 1px solid var(--line);
+  padding: clamp(1.6rem, 4vw, 2.6rem);
+  transform: translateY(18px);
+  transition: transform 0.4s var(--ease);
+}
+.consult-modal.open .consult-panel { transform: none; }
+
+.consult-panel h3 {
+  font-size: clamp(1.5rem, 3vw, 1.9rem);
+  margin-bottom: 0.4rem;
+}
+.consult-panel .sub {
+  font-size: 0.85rem;
+  color: var(--ivory-50);
+  margin-bottom: 1.6rem;
+  line-height: 1.7;
+}
+
+.consult-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 2.4rem;
+  height: 2.4rem;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: 1px solid var(--line-soft);
+  border-radius: 50%;
+  color: var(--ivory-70);
+  cursor: pointer;
+  transition: color 0.3s, border-color 0.3s, transform 0.3s;
+}
+.consult-close:hover { color: var(--peach); border-color: var(--peach); transform: rotate(90deg); }
+
+body.consult-open { overflow: hidden; }
 
 /* ---------- Reveal animations ---------- */
 

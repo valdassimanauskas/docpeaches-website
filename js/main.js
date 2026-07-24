@@ -66,6 +66,58 @@
   // Floating contact widget (built here so it appears on every page)
   var headerCta = document.querySelector(".header-cta");
   var contactHref = headerCta ? headerCta.getAttribute("href") : "contact.html";
+  var siteRoot = contactHref.replace(/contact\.html$/, "");
+
+  // Consultation modal — opened by any "Request Consultation" button
+  var modal = document.createElement("div");
+  modal.className = "consult-modal";
+  modal.innerHTML =
+    '<div class="consult-backdrop"></div>' +
+    '<div class="consult-panel" role="dialog" aria-modal="true" aria-label="Request a consultation">' +
+    '<button class="consult-close" aria-label="Close">' +
+    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>' +
+    '<span class="kicker">Request Consultation</span>' +
+    '<h3 class="serif">Begin your evaluation</h3>' +
+    '<p class="sub">Tell us about your symptoms and goals. Our team will reach out to guide you through the next steps. Or call <a href="tel:3863875289" style="color:var(--peach)">386-387-5289</a>.</p>' +
+    '<form class="contact-form consult-form">' +
+    '<div class="form-row">' +
+    '<div class="field"><label for="cm-name">Full Name</label><input id="cm-name" name="name" type="text" required autocomplete="name"></div>' +
+    '<div class="field"><label for="cm-phone">Phone</label><input id="cm-phone" name="phone" type="tel" autocomplete="tel"></div>' +
+    "</div>" +
+    '<div class="form-row">' +
+    '<div class="field"><label for="cm-email">Email</label><input id="cm-email" name="email" type="email" required autocomplete="email"></div>' +
+    '<div class="field"><label for="cm-interest">I\'m interested in</label><select id="cm-interest" name="interest">' +
+    "<option>Spine Care</option><option>Orthopedics / Joint Pain</option><option>Sports Medicine</option><option>Regenerative Medicine</option><option>Hair Restoration</option><option>Hormone Optimization</option><option>Weight Loss &amp; Metabolic Health</option><option>Sexual Wellness</option><option>Longevity &amp; Performance</option><option>Other</option>" +
+    "</select></div></div>" +
+    '<div class="field"><label for="cm-message">Symptoms &amp; goals</label><textarea id="cm-message" name="message" style="min-height:6.5rem"></textarea></div>' +
+    '<button class="btn solid" type="submit" style="justify-content:center"><span>Send Request</span><span class="arrow">→</span></button>' +
+    '<p style="font-size:0.7rem;color:var(--ivory-50);line-height:1.7">Sending opens your email app with this request pre-filled to info@docpeaches.com.</p>' +
+    "</form></div>";
+  document.body.appendChild(modal);
+
+  function openModal() {
+    modal.classList.add("open");
+    document.body.classList.add("consult-open");
+    var first = modal.querySelector("input");
+    if (first) setTimeout(function () { first.focus(); }, 380);
+  }
+  function closeModal() {
+    modal.classList.remove("open");
+    document.body.classList.remove("consult-open");
+  }
+  modal.querySelector(".consult-close").addEventListener("click", closeModal);
+  modal.querySelector(".consult-backdrop").addEventListener("click", closeModal);
+  document.addEventListener("keydown", function (ev) {
+    if (ev.key === "Escape") closeModal();
+  });
+
+  // Any button-styled link to the contact page opens the modal instantly
+  document.querySelectorAll('a.btn[href$="contact.html"]').forEach(function (a) {
+    a.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      openModal();
+    });
+  });
   var fab = document.createElement("div");
   fab.className = "fab";
   var icoPhone =
@@ -78,10 +130,10 @@
     '<div class="fab-menu">' +
     '<a href="tel:3863875289"><span class="fab-ico">' + icoPhone + '</span><span>Call 386-387-5289</span></a>' +
     '<a href="mailto:info@docpeaches.com"><span class="fab-ico">' + icoMail + '</span><span>Email Us</span></a>' +
-    '<a href="' + contactHref + '"><span class="fab-ico">' + icoCal + '</span><span>Request Consultation</span></a>' +
+    '<a href="' + contactHref + '" class="fab-consult"><span class="fab-ico">' + icoCal + '</span><span>Request Consultation</span></a>' +
     "</div>" +
     '<button class="fab-btn" aria-label="Contact options" aria-expanded="false">' +
-    '<span class="fab-open">' + icoPhone.replace('width="17" height="17"', 'width="22" height="22"') + "</span>" +
+    '<span class="fab-open"><img src="' + siteRoot + 'assets/img/peach-mark.png" alt=""></span>' +
     '<span class="fab-close"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></span></button>';
   document.body.appendChild(fab);
   var fabBtn = fab.querySelector(".fab-btn");
@@ -95,10 +147,15 @@
       fabBtn.setAttribute("aria-expanded", "false");
     }
   });
+  fab.querySelector(".fab-consult").addEventListener("click", function (ev) {
+    ev.preventDefault();
+    fab.classList.remove("open");
+    fabBtn.setAttribute("aria-expanded", "false");
+    openModal();
+  });
 
-  // Contact form (no backend — mailto handoff)
-  var form = document.querySelector("form.contact-form");
-  if (form) {
+  // Contact forms (no backend — mailto handoff)
+  document.querySelectorAll("form.contact-form").forEach(function (form) {
     form.addEventListener("submit", function (ev) {
       ev.preventDefault();
       var d = new FormData(form);
@@ -113,5 +170,5 @@
         encodeURIComponent("Consultation Request — " + d.get("name")) +
         "&body=" + encodeURIComponent(body);
     });
-  }
+  });
 })();
